@@ -1,0 +1,970 @@
+[
+  {
+    "remarks": "💦 1 - VLESS F - Domain : 443 - FIXED",
+    "version": {
+      "min": "26.2.6"
+    },
+    "log": {
+      "loglevel": "none"
+    },
+    "dns": {
+      "servers": [
+        {
+          "address": "https://162.159.140.245/dns-query",
+          "tag": "remote-dns"
+        },
+        {
+          "address": "78.157.42.101",
+          "domains": [
+            "geosite:category-ir"
+          ],
+          "expectIPs": [
+            "geoip:ir"
+          ],
+          "skipFallback": true
+        },
+        {
+          "address": "212.33.202.227",
+          "domains": [
+            "geosite:openai",
+            "geosite:google-deepmind",
+            "geosite:microsoft",
+            "geosite:oracle",
+            "geosite:docker",
+            "geosite:adobe",
+            "geosite:epicgames",
+            "geosite:intel",
+            "geosite:amd",
+            "geosite:nvidia",
+            "geosite:asus",
+            "geosite:hp",
+            "geosite:lenovo"
+          ],
+          "skipFallback": true,
+          "finalQuery": true
+        },
+        {
+          "address": "78.157.42.101",
+          "domains": [
+            "full:yasin5ghgtryyyghgfr44ug.adrian-varen.workers.dev"
+          ],
+          "skipFallback": true
+        }
+      ],
+      "queryStrategy": "UseIP",
+      "tag": "dns"
+    },
+    "inbounds": [
+      {
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "mixed",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "destOverride": [
+            "http",
+            "tls"
+          ],
+          "enabled": true,
+          "routeOnly": true
+        },
+        "tag": "mixed-in"
+      },
+      {
+        "listen": "127.0.0.1",
+        "port": 10853,
+        "protocol": "dokodemo-door",
+        "settings": {
+          "address": "1.1.1.1",
+          "network": "tcp,udp",
+          "port": 53
+        },
+        "tag": "dns-in"
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "yasin5ghgtryyyghgfr44ug.adrian-varen.workers.dev",
+              "port": 443,
+              "users": [
+                {
+                  "id": "bbb19b85-81b3-4f8a-8d5d-8ecb1732244c",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "wsSettings": {
+            "host": "yasin5ghgtryyyghgfr44ug.adrian-varen.workers.dev",
+            "path": "/eyJqdW5rIjoiTWI2aGs3aE5wRiIsInByb3RvY29sIjoidmwiLCJtb2RlIjoicHJveHlpcCIsInBhbmVsSVBzIjpbXX0=?ed=2560"
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "yASin5ghGTRyyyGhgfr44Ug.AdRiaN-VarEn.wOrKErS.deV",
+            "fingerprint": "qq",
+            "alpn": [
+              "http/1.1"
+            ]
+          },
+          "sockopt": {
+            "domainStrategy": "UseIP",
+            "happyEyeballs": {
+              "tryDelayMs": 250,
+              "prioritizeIPv6": false,
+              "interleave": 2,
+              "maxConcurrentTry": 4
+            }
+          },
+          "finalmask": {
+            "tcp": [
+              {
+                "type": "fragment",
+                "settings": {
+                  "packets": "1-5",
+                  "length": "1",
+                  "delay": "1",
+                  "maxSplit": "2"
+                }
+              }
+            ]
+          }
+        },
+        "tag": "proxy"
+      },
+      {
+        "protocol": "dns",
+        "settings": {
+          "rules": [
+            {
+              "action": "hijack"
+            }
+          ]
+        },
+        "tag": "dns-out"
+      },
+      {
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        },
+        "tag": "direct"
+      },
+      {
+        "protocol": "blackhole",
+        "settings": {
+          "response": {
+            "type": "http"
+          }
+        },
+        "tag": "block"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "IPIfNonMatch",
+      "rules": [
+        {
+          "inboundTag": [
+            "mixed-in"
+          ],
+          "port": 53,
+          "outboundTag": "dns-out",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "dns-in"
+          ],
+          "outboundTag": "dns-out",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "remote-dns"
+          ],
+          "outboundTag": "proxy",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "dns"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "domain": [
+            "geosite:private"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "protocol": [
+            "flash"
+          ],
+          "port": "443",
+          "network": "udp",
+          "outboundTag": "block",
+          "type": "field"
+        },
+        {
+          "domain": [
+            "geosite:category-ir",
+            "geosite:openai",
+            "geosite:google-deepmind",
+            "geosite:microsoft",
+            "geosite:oracle",
+            "geosite:docker",
+            "geosite:adobe",
+            "geosite:epicgames",
+            "geosite:intel",
+            "geosite:amd",
+            "geosite:nvidia",
+            "geosite:asus",
+            "geosite:hp",
+            "geosite:lenovo"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "ip": [
+            "geoip:ir"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "network": "tcp",
+          "outboundTag": "proxy",
+          "type": "field"
+        }
+      ]
+    },
+    "policy": {
+      "levels": {
+        "0": {
+          "connIdle": 300,
+          "handshake": 4,
+          "uplinkOnly": 1,
+          "downlinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundUplink": true,
+        "statsOutboundDownlink": true
+      }
+    },
+    "stats": {}
+  },
+  {
+    "remarks": "💦 2 - VLESS F - Domain : 443 - FIXED",
+    "version": {
+      "min": "26.2.6"
+    },
+    "log": {
+      "loglevel": "none"
+    },
+    "dns": {
+      "servers": [
+        {
+          "address": "https://162.159.140.245/dns-query",
+          "tag": "remote-dns"
+        },
+        {
+          "address": "78.157.42.101",
+          "domains": [
+            "geosite:category-ir"
+          ],
+          "expectIPs": [
+            "geoip:ir"
+          ],
+          "skipFallback": true
+        },
+        {
+          "address": "212.33.202.227",
+          "domains": [
+            "geosite:openai",
+            "geosite:google-deepmind",
+            "geosite:microsoft",
+            "geosite:oracle",
+            "geosite:docker",
+            "geosite:adobe",
+            "geosite:epicgames",
+            "geosite:intel",
+            "geosite:amd",
+            "geosite:nvidia",
+            "geosite:asus",
+            "geosite:hp",
+            "geosite:lenovo"
+          ],
+          "skipFallback": true,
+          "finalQuery": true
+        },
+        {
+          "address": "78.157.42.101",
+          "domains": [
+            "full:www.speedtest.net"
+          ],
+          "skipFallback": true
+        }
+      ],
+      "queryStrategy": "UseIP",
+      "tag": "dns"
+    },
+    "inbounds": [
+      {
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "mixed",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "destOverride": [
+            "http",
+            "tls"
+          ],
+          "enabled": true,
+          "routeOnly": true
+        },
+        "tag": "mixed-in"
+      },
+      {
+        "listen": "127.0.0.1",
+        "port": 10853,
+        "protocol": "dokodemo-door",
+        "settings": {
+          "address": "1.1.1.1",
+          "network": "tcp,udp",
+          "port": 53
+        },
+        "tag": "dns-in"
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "www.speedtest.net",
+              "port": 443,
+              "users": [
+                {
+                  "id": "bbb19b85-81b3-4f8a-8d5d-8ecb1732244c",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "wsSettings": {
+            "host": "yasin5ghgtryyyghgfr44ug.adrian-varen.workers.dev",
+            "path": "/eyJqdW5rIjoiUWpDdWkxZWdVIiwicHJvdG9jb2wiOiJ2bCIsIm1vZGUiOiJwcm94eWlwIiwicGFuZWxJUHMiOltdfQ==?ed=2560"
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "yaSiN5GhgTRyYYGHgfR44ug.adrian-vArEn.worKeRS.DeV",
+            "fingerprint": "qq",
+            "alpn": [
+              "http/1.1"
+            ]
+          },
+          "sockopt": {
+            "domainStrategy": "UseIP",
+            "happyEyeballs": {
+              "tryDelayMs": 250,
+              "prioritizeIPv6": false,
+              "interleave": 2,
+              "maxConcurrentTry": 4
+            }
+          },
+          "finalmask": {
+            "tcp": [
+              {
+                "type": "fragment",
+                "settings": {
+                  "packets": "1-5",
+                  "length": "1",
+                  "delay": "1",
+                  "maxSplit": "2"
+                }
+              }
+            ]
+          }
+        },
+        "tag": "proxy"
+      },
+      {
+        "protocol": "dns",
+        "settings": {
+          "rules": [
+            {
+              "action": "hijack"
+            }
+          ]
+        },
+        "tag": "dns-out"
+      },
+      {
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        },
+        "tag": "direct"
+      },
+      {
+        "protocol": "blackhole",
+        "settings": {
+          "response": {
+            "type": "http"
+          }
+        },
+        "tag": "block"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "IPIfNonMatch",
+      "rules": [
+        {
+          "inboundTag": [
+            "mixed-in"
+          ],
+          "port": 53,
+          "outboundTag": "dns-out",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "dns-in"
+          ],
+          "outboundTag": "dns-out",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "remote-dns"
+          ],
+          "outboundTag": "proxy",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "dns"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "domain": [
+            "geosite:private"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "protocol": [
+            "flash"
+          ],
+          "port": "443",
+          "network": "udp",
+          "outboundTag": "block",
+          "type": "field"
+        },
+        {
+          "domain": [
+            "geosite:category-ir",
+            "geosite:openai",
+            "geosite:google-deepmind",
+            "geosite:microsoft",
+            "geosite:oracle",
+            "geosite:docker",
+            "geosite:adobe",
+            "geosite:epicgames",
+            "geosite:intel",
+            "geosite:amd",
+            "geosite:nvidia",
+            "geosite:asus",
+            "geosite:hp",
+            "geosite:lenovo"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "ip": [
+            "geoip:ir"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "network": "tcp",
+          "outboundTag": "proxy",
+          "type": "field"
+        }
+      ]
+    },
+    "policy": {
+      "levels": {
+        "0": {
+          "connIdle": 300,
+          "handshake": 4,
+          "uplinkOnly": 1,
+          "downlinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundUplink": true,
+        "statsOutboundDownlink": true
+      }
+    },
+    "stats": {}
+  },
+  {
+    "remarks": "💦 3 - VLESS F - IPv4 : 443 - FIXED",
+    "version": {
+      "min": "26.2.6"
+    },
+    "log": {
+      "loglevel": "none"
+    },
+    "dns": {
+      "servers": [
+        {
+          "address": "https://162.159.140.245/dns-query",
+          "tag": "remote-dns"
+        },
+        {
+          "address": "78.157.42.101",
+          "domains": [
+            "geosite:category-ir"
+          ],
+          "expectIPs": [
+            "geoip:ir"
+          ],
+          "skipFallback": true
+        },
+        {
+          "address": "212.33.202.227",
+          "domains": [
+            "geosite:openai",
+            "geosite:google-deepmind",
+            "geosite:microsoft",
+            "geosite:oracle",
+            "geosite:docker",
+            "geosite:adobe",
+            "geosite:epicgames",
+            "geosite:intel",
+            "geosite:amd",
+            "geosite:nvidia",
+            "geosite:asus",
+            "geosite:hp",
+            "geosite:lenovo"
+          ],
+          "skipFallback": true,
+          "finalQuery": true
+        }
+      ],
+      "queryStrategy": "UseIP",
+      "tag": "dns"
+    },
+    "inbounds": [
+      {
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "mixed",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "destOverride": [
+            "http",
+            "tls"
+          ],
+          "enabled": true,
+          "routeOnly": true
+        },
+        "tag": "mixed-in"
+      },
+      {
+        "listen": "127.0.0.1",
+        "port": 10853,
+        "protocol": "dokodemo-door",
+        "settings": {
+          "address": "1.1.1.1",
+          "network": "tcp,udp",
+          "port": 53
+        },
+        "tag": "dns-in"
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.97.2",
+              "port": 443,
+              "users": [
+                {
+                  "id": "bbb19b85-81b3-4f8a-8d5d-8ecb1732244c",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "wsSettings": {
+            "host": "yasin5ghgtryyyghgfr44ug.adrian-varen.workers.dev",
+            "path": "/eyJqdW5rIjoiQ3BCeTJQRWZqcW5naCIsInByb3RvY29sIjoidmwiLCJtb2RlIjoicHJveHlpcCIsInBhbmVsSVBzIjpbXX0=?ed=2560"
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "yASin5GhgtRYYYgHGfR44uG.AdrIAN-vaReN.WOrKErS.deV",
+            "fingerprint": "qq",
+            "alpn": [
+              "http/1.1"
+            ]
+          },
+          "sockopt": {
+                        "domainStrategy": "UseIP",
+            "happyEyeballs": {
+              "tryDelayMs": 250,
+              "prioritizeIPv6": false,
+              "interleave": 2,
+              "maxConcurrentTry": 4
+            }
+          },
+          "finalmask": {
+            "tcp": [
+              {
+                "type": "fragment",
+                "settings": {
+                  "packets": "1-5",
+                  "length": "1",
+                  "delay": "1",
+                  "maxSplit": "2"
+                }
+              }
+            ]
+          }
+        },
+        "tag": "proxy"
+      },
+      {
+        "protocol": "dns",
+        "settings": {
+          "rules": [
+            {
+              "action": "hijack"
+            }
+          ]
+        },
+        "tag": "dns-out"
+      },
+      {
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        },
+        "tag": "direct"
+      },
+      {
+        "protocol": "blackhole",
+        "settings": {
+          "response": {
+            "type": "http"
+          }
+        },
+        "tag": "block"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "IPIfNonMatch",
+      "rules": [
+        {
+          "inboundTag": [
+            "mixed-in"
+          ],
+          "port": 53,
+          "outboundTag": "dns-out",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "dns-in"
+          ],
+          "outboundTag": "dns-out",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "remote-dns"
+          ],
+          "outboundTag": "proxy",
+          "type": "field"
+        },
+        {
+          "inboundTag": [
+            "dns"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "domain": [
+            "geosite:private"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "protocol": [
+            "flash"
+          ],
+          "port": "443",
+          "network": "udp",
+          "outboundTag": "block",
+          "type": "field"
+        },
+        {
+          "domain": [
+            "geosite:category-ir",
+            "geosite:openai",
+            "geosite:google-deepmind",
+            "geosite:microsoft",
+            "geosite:oracle",
+            "geosite:docker",
+            "geosite:adobe",
+            "geosite:epicgames",
+            "geosite:intel",
+            "geosite:amd",
+            "geosite:nvidia",
+            "geosite:asus",
+            "geosite:hp",
+            "geosite:lenovo"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "ip": [
+            "geoip:ir"
+          ],
+          "outboundTag": "direct",
+          "type": "field"
+        },
+        {
+          "network": "tcp",
+          "outboundTag": "proxy",
+          "type": "field"
+        }
+      ]
+    },
+    "policy": {
+      "levels": {
+        "0": {
+          "connIdle": 300,
+          "handshake": 4,
+          "uplinkOnly": 1,
+          "downlinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundUplink": true,
+        "statsOutboundDownlink": true
+      }
+    },
+    "stats": {}
+  },
+  {
+    "remarks": "💦 4 - VLESS F - IPv4 : 443 - FIXED",
+    "version": {
+      "min": "26.2.6"
+    },
+    "log": {
+      "loglevel": "none"
+    },
+    "dns": {
+      "servers": [
+        {
+          "address": "https://162.159.140.245/dns-query",
+          "tag": "remote-dns"
+        },
+        {
+          "address": "78.157.42.101",
+          "domains": [
+            "geosite:category-ir"
+          ],
+          "expectIPs": [
+            "geoip:ir"
+          ],
+          "skipFallback": true
+        },
+        {
+          "address": "212.33.202.227",
+          "domains": [
+            "geosite:openai",
+            "geosite:google-deepmind",
+            "geosite:microsoft",
+            "geosite:oracle",
+            "geosite:docker",
+            "geosite:adobe",
+            "geosite:epicgames",
+            "geosite:intel",
+            "geosite:amd",
+            "geosite:nvidia",
+            "geosite:asus",
+            "geosite:hp",
+            "geosite:lenovo"
+          ],
+          "skipFallback": true,
+          "finalQuery": true
+        }
+      ],
+      "queryStrategy": "UseIP",
+      "tag": "dns"
+    },
+    "inbounds": [
+      {
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "mixed",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "destOverride": [
+            "http",
+            "tls"
+          ],
+          "enabled": true,
+          "routeOnly": true
+        },
+        "tag": "mixed-in"
+      },
+      {
+        "listen": "127.0.0.1",
+        "port": 10853,
+        "protocol": "dokodemo-door",
+        "settings": {
+          "address": "1.1.1.1",
+          "network": "tcp,udp",
+          "port": 53
+        },
+        "tag": "dns-in"
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.96.2",
+              "port": 443,
+              "users": [
+                {
+                  "id": "bbb19b85-81b3-4f8a-8d5d-8ecb1732244c",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "wsSettings": {
+            "host": "yasin5ghgtryyyghgfr44ug.adrian-varen.workers.dev",
+            "path": "/eyJqdW5rIjoiemdvSFg2UlBnIiwicHJvdG9jb2wiOiJ2bCIsIm1vZGUiOiJwcm94eWlwIiwicGFuZWxJUHMiOltdfQ==?ed=2560"
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "YAsIN5gHgtryyyGhGfr44UG.ADRiAN-VareN.worKErS.DEV",
+            "fingerprint": "qq",
+            "alpn": [
+              "http/1.1"
+            ]
+          },
+          "sockopt": {
+            "domainStrategy": "UseIP",
+            "happyEyeballs": {
+              "tryDelayMs": 250,
+              "prioritizeIPv6": false,
+              "interleave": 2,
+              "maxConcurrentTry": 4
+            }
+          },
+          "finalmask": {
+            "tcp": [
+              {
+                "type": "fragment",
+                "settings": {
+                  "packets": "1-5",
+                  "length": "1",
+                  "delay": "1",
+                  "maxSplit": "2"
+                }
+              }
+            ]
+          }
+        },
+        "tag": "proxy"
+      },
+      {
+        "protocol": "dns",
+        "settings": {
+          "rules": [
+            {
+              "action": "hijack"
+            }
+          ]
+        },
+        "tag": "dns-out"
+      },
+      {
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        },
